@@ -4843,15 +4843,53 @@ do
                 end)
             ]]
             Utility.AddDrag(WindowOutline, Library.Watermark)
-            --
-            Utility.AddConnection(RunService.RenderStepped, function()
+            local wmGameName = tostring(game.Name ~= "" and game.Name or "Game")
+            task.spawn(function()
+                pcall(function()
+                    local info = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId)
+                    if type(info) == "table" and type(info.Name) == "string" and info.Name ~= "" then
+                        wmGameName = info.Name
+                    end
+                end)
+            end)
+            local wmFpsAcc, wmFpsFrames, wmFps = 0, 0, 0
+            local wmPingAcc, wmPing = 0, 0
+            Utility.AddConnection(RunService.RenderStepped, function(dt)
                 Watermark.FPS += 1
                 if Watermark.Visible and Library.Flags.UIWatermarkEnabled ~= false then
-                    local Hours, Minutes, Secs = os.date("*t")["hour"], os.date("*t")["min"], os.date("*t")["sec"]
-                    local Format = Hours > 12 and Hours - 12 or Hours
-                    local AMORPM = Hours > 12 and "PM" or "AM"
-                    local FixZero = string.len(tostring(Secs)) == 1 and "0" .. Secs or Secs
-                    WindowTitle.Text =  ("%s | %s:%s:%s %s | %s, %s, %s, %s"):format(Watermark.Title, Format, Minutes, FixZero, AMORPM, os.date("%A"), os.date("%B"), os.date("%d"), os.date("%Y"))
+                    dt = tonumber(dt) or 0
+                    wmFpsAcc += dt
+                    wmFpsFrames += 1
+                    if wmFpsAcc >= 0.2 then
+                        wmFps = math.floor(wmFpsFrames / wmFpsAcc + 0.5)
+                        wmFpsAcc = 0
+                        wmFpsFrames = 0
+                    end
+                    wmPingAcc += dt
+                    if wmPingAcc >= 0.25 then
+                        wmPingAcc = 0
+                        local ms = 0
+                        pcall(function()
+                            ms = Stats:GetValue()
+                        end)
+                        if type(ms) ~= "number" or ms <= 0 then
+                            pcall(function()
+                                ms = (LocalPlayer:GetNetworkPing() or 0) * 1000
+                            end)
+                        end
+                        if type(ms) == "number" then
+                            wmPing = math.clamp(math.floor(ms + 0.5), 0, 9999)
+                        end
+                    end
+                    local brand = Watermark.Title or "Artefact"
+                    local discord = "discord.gg/artefact"
+                    local gname = wmGameName
+                    if #gname > 22 then
+                        gname = string.sub(gname, 1, 20) .. ".."
+                    end
+                    local nPlayers = #Players:GetPlayers()
+                    local maxPlayers = tonumber(Players.MaxPlayers) or nPlayers
+                    WindowTitle.Text = ("%s  %s  %d/%d | %dfps | %dms | %s"):format(brand, gname, nPlayers, maxPlayers, wmFps, wmPing, discord)
 
                     WindowOutline.Visible = true
                     WindowImage.Visible = true
