@@ -2053,7 +2053,7 @@ do
                             Size = Vector2.new(60, 16),
                             Thickness = 0,
                             Color = Library.Theme.Inline,
-                            Visible = true,
+                            Visible = false,
                             Filled = true,
                             ZIndex = 3
                         })
@@ -2063,7 +2063,7 @@ do
                             Position = Vector2.new(KeybindHoldInline.Position.X + 1, KeybindHoldInline.Position.Y + 1),
                             Thickness = 0,
                             Color = Library.Theme.LightContrast, --Library.Theme.Outline,
-                            Visible = true,
+                            Visible = false,
                             Filled = true,
                             ZIndex = 3
                         })
@@ -2073,7 +2073,7 @@ do
                             Position = Vector2.new(KeybindHoldInline.Position.X + 1, KeybindHoldInline.Position.Y + 1),
                             Data = Library.Theme.Gradient,
                             Transparency = 1,
-                            Visible = true,
+                            Visible = false,
                             ZIndex = 3
                         })
                         --
@@ -2085,7 +2085,7 @@ do
                             Font = Library.Theme.Font,
                             Size = Library.Theme.TextSize,
                             Color = Library.Theme.Text,
-                            Visible = true,
+                            Visible = false,
                             ZIndex = 3
                         })
                         --
@@ -2094,8 +2094,9 @@ do
                             Size = Vector2.new(60, 16),
                             Thickness = 0,
                             Color = Library.Theme.Inline,
-                            Visible = true,
-                            Filled = true
+                            Visible = false,
+                            Filled = true,
+                            ZIndex = 3
                         })
                         --
                         local KeybindToggleOutline = Utility.AddDrawing("Square", {
@@ -2103,7 +2104,7 @@ do
                             Position = Vector2.new(KeybindToggleInline.Position.X + 1, KeybindToggleInline.Position.Y + 1),
                             Thickness = 0,
                             Color = Library.Theme.LightContrast, --Library.Theme.Outline,
-                            Visible = true,
+                            Visible = false,
                             Filled = true,
                             ZIndex = 3
                         })
@@ -2113,7 +2114,7 @@ do
                             Position = Vector2.new(KeybindToggleInline.Position.X + 1, KeybindToggleInline.Position.Y + 1),
                             Data = Library.Theme.Gradient,
                             Transparency = 1,
-                            Visible = true,
+                            Visible = false,
                             ZIndex = 3
                         })
                         --
@@ -2125,7 +2126,7 @@ do
                             Font = Library.Theme.Font,
                             Size = Library.Theme.TextSize,
                             Color = Library.Theme.Text,
-                            Visible = true,
+                            Visible = false,
                             ZIndex = 3
                         })
                         --
@@ -2134,7 +2135,7 @@ do
                             Size = Vector2.new(60, 16),
                             Thickness = 0,
                             Color = Library.Theme.Inline,
-                            Visible = true,
+                            Visible = false,
                             Filled = true,
                             ZIndex = 3
                         })
@@ -2144,7 +2145,7 @@ do
                             Position = Vector2.new(KeybindAlwaysInline.Position.X + 1, KeybindAlwaysInline.Position.Y + 1),
                             Thickness = 0,
                             Color = Library.Theme.LightContrast, --Library.Theme.Outline,
-                            Visible = true,
+                            Visible = false,
                             Filled = true,
                             ZIndex = 3
                         })
@@ -2154,7 +2155,7 @@ do
                             Position = Vector2.new(KeybindAlwaysInline.Position.X + 1, KeybindAlwaysInline.Position.Y + 1),
                             Data = Library.Theme.Gradient,
                             Transparency = 1,
-                            Visible = true,
+                            Visible = false,
                             ZIndex = 3
                         })
                         --
@@ -2166,7 +2167,7 @@ do
                             Font = Library.Theme.Font,
                             Size = Library.Theme.TextSize,
                             Color = Library.Theme.Text,
-                            Visible = true,
+                            Visible = false,
                             ZIndex = 3
                         })
                         --
@@ -2222,12 +2223,18 @@ do
                                 end
                                 if Utility.OnMouse(KeybindHoldInline) then
                                     Keybind:SetStateType("Hold")
+                                    Keybind.Dropped = false
+                                    Keybind:Drop(false)
                                 end
                                 if Utility.OnMouse(KeybindToggleInline) then
                                     Keybind:SetStateType("Toggle")
+                                    Keybind.Dropped = false
+                                    Keybind:Drop(false)
                                 end
                                 if Utility.OnMouse(KeybindAlwaysInline) then
                                     Keybind:SetStateType("Always")
+                                    Keybind.Dropped = false
+                                    Keybind:Drop(false)
                                 end
                                 if Utility.OnMouse(KeybindInline) then
                                     for Index, Value in pairs(Tab.Dropdowns[Side]) do
@@ -3735,8 +3742,9 @@ do
                         Size = Vector2.new(60, 16),
                         Thickness = 0,
                         Color = Library.Theme.Inline,
-                        Visible = true,
-                        Filled = true
+                        Visible = false,
+                        Filled = true,
+                        ZIndex = 3
                     })
                     --
                     local KeybindHoldOutline = Utility.AddDrawing("Square", {
@@ -3744,8 +3752,9 @@ do
                         Position = Vector2.new(KeybindHoldInline.Position.X + 1, KeybindHoldInline.Position.Y + 1),
                         Thickness = 0,
                         Color = Library.Theme.LightContrast, --Library.Theme.Outline,
-                        Visible = true,
-                        Filled = true
+                        Visible = false,
+                        Filled = true,
+                        ZIndex = 3
                     })
                     --
                     local KeybindHoldGradient = Utility.AddDrawing("Image", {
@@ -3753,7 +3762,8 @@ do
                         Position = Vector2.new(KeybindHoldInline.Position.X + 1, KeybindHoldInline.Position.Y + 1),
                         Data = Library.Theme.Gradient,
                         Transparency = 1,
-                        Visible = true
+                        Visible = false,
+                        ZIndex = 3
                     })
                     --
                     local KeybindHoldValue = Utility.AddDrawing("Text", {
@@ -3764,8 +3774,8 @@ do
                         Font = Library.Theme.Font,
                         Size = Library.Theme.TextSize,
                         Color = Library.Theme.Text,
-                        Visible = true,
-                        ZIndex = 2
+                        Visible = false,
+                        ZIndex = 3
                     })
                     --
                     local KeybindToggleInline = Utility.AddDrawing("Square", {
@@ -3773,8 +3783,9 @@ do
                         Size = Vector2.new(60, 16),
                         Thickness = 0,
                         Color = Library.Theme.Inline,
-                        Visible = true,
-                        Filled = true
+                        Visible = false,
+                        Filled = true,
+                        ZIndex = 3
                     })
                     --
                     local KeybindToggleOutline = Utility.AddDrawing("Square", {
@@ -3782,8 +3793,9 @@ do
                         Position = Vector2.new(KeybindToggleInline.Position.X + 1, KeybindToggleInline.Position.Y + 1),
                         Thickness = 0,
                         Color = Library.Theme.LightContrast, --Library.Theme.Outline,
-                        Visible = true,
-                        Filled = true
+                        Visible = false,
+                        Filled = true,
+                        ZIndex = 3
                     })
                     --
                     local KeybindToggleGradient = Utility.AddDrawing("Image", {
@@ -3791,7 +3803,8 @@ do
                         Position = Vector2.new(KeybindToggleInline.Position.X + 1, KeybindToggleInline.Position.Y + 1),
                         Data = Library.Theme.Gradient,
                         Transparency = 1,
-                        Visible = true
+                        Visible = false,
+                        ZIndex = 3
                     })
                     --
                     local KeybindToggleValue = Utility.AddDrawing("Text", {
@@ -3802,8 +3815,8 @@ do
                         Font = Library.Theme.Font,
                         Size = Library.Theme.TextSize,
                         Color = Library.Theme.Text,
-                        Visible = true,
-                        ZIndex = 2
+                        Visible = false,
+                        ZIndex = 3
                     })
                     --
                     local KeybindAlwaysInline = Utility.AddDrawing("Square", {
@@ -3811,8 +3824,9 @@ do
                         Size = Vector2.new(60, 16),
                         Thickness = 0,
                         Color = Library.Theme.Inline,
-                        Visible = true,
-                        Filled = true
+                        Visible = false,
+                        Filled = true,
+                        ZIndex = 3
                     })
                     --
                     local KeybindAlwaysOutline = Utility.AddDrawing("Square", {
@@ -3820,8 +3834,9 @@ do
                         Position = Vector2.new(KeybindAlwaysInline.Position.X + 1, KeybindAlwaysInline.Position.Y + 1),
                         Thickness = 0,
                         Color = Library.Theme.LightContrast, --Library.Theme.Outline,
-                        Visible = true,
-                        Filled = true
+                        Visible = false,
+                        Filled = true,
+                        ZIndex = 3
                     })
                     --
                     local KeybindAlwaysGradient = Utility.AddDrawing("Image", {
@@ -3829,7 +3844,8 @@ do
                         Position = Vector2.new(KeybindAlwaysInline.Position.X + 1, KeybindAlwaysInline.Position.Y + 1),
                         Data = Library.Theme.Gradient,
                         Transparency = 1,
-                        Visible = true
+                        Visible = false,
+                        ZIndex = 3
                     })
                     --
                     local KeybindAlwaysValue = Utility.AddDrawing("Text", {
@@ -3840,8 +3856,8 @@ do
                         Font = Library.Theme.Font,
                         Size = Library.Theme.TextSize,
                         Color = Library.Theme.Text,
-                        Visible = true,
-                        ZIndex = 2
+                        Visible = false,
+                        ZIndex = 3
                     })
                     --
                     function Keybind:Drop(State)
@@ -3912,12 +3928,19 @@ do
                             end
                             if Utility.OnMouse(KeybindHoldInline) then
                                 Keybind:SetStateType("Hold")
-                            end
-                            if Utility.OnMouse(KeybindToggleInline) then
+                                Keybind.Dropped = false
+                                Keybind:Drop(false)
+                            elseif Utility.OnMouse(KeybindToggleInline) then
                                 Keybind:SetStateType("Toggle")
-                            end
-                            if Utility.OnMouse(KeybindAlwaysInline) then
+                                Keybind.Dropped = false
+                                Keybind:Drop(false)
+                            elseif Utility.OnMouse(KeybindAlwaysInline) then
                                 Keybind:SetStateType("Always")
+                                Keybind.Dropped = false
+                                Keybind:Drop(false)
+                            elseif not Utility.OnMouse(KeybindInline) then
+                                Keybind.Dropped = false
+                                Keybind:Drop(false)
                             end
                         elseif Input.UserInputType == Enum.UserInputType.Keyboard then
                             if Keybind.Binding then
