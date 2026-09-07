@@ -1,8 +1,4 @@
--- // Lib \\ --
---[[
-    local UI = loadstring(game:HttpGet("https://akiri.best/assets/files/gayasf.ui2?key=5y1lxXSfWKhlQkSqhUuFyB8kPp8hsCau"))()
-]]
--- // Library Init \\ --
+
 local Start = tick()
 local LoadTime = tick()
 local Secure = setmetatable({}, {
@@ -22,13 +18,10 @@ local Mouse = LocalPlayer:GetMouse()
 local InputGUI = Instance.new("ScreenGui", CoreGui)
 
 local Stats = Secure.Stats.Network.ServerStatsItem["Data Ping"] 
---
--- Aimware = {6, [[{"Outline":"000005","Accent":"c82828","LightText":"e8e8e8","DarkText":"afafaf","LightContrast":"2b2b2b","CursorOutline":"191919","DarkContrast":"191919","TextBorder":"0a0a0a","Inline":"373737"}]]},
---
 local Library = {
     Theme = {
         Accent = {
-            Color3.fromHex("#c37be5"), -- Color3.fromHex("#a280d9"), -- Color3.fromRGB(255, 42, 10), Color3.fromHex("#3599d4")
+            Color3.fromHex("#c37be5"),
             Color3.fromRGB(180, 156, 255),
             Color3.fromRGB(114, 0, 198),
             Color3.fromRGB(139, 130, 185),
@@ -78,19 +71,134 @@ local Utility = {}
 --
 Library._ArtefactGlowLib = true
 getgenv().Library = Library
+
+do
+    local TweenService = Secure.TweenService
+    local gui = Instance.new("ScreenGui")
+    gui.Name = "AkiriNotify"
+    gui.IgnoreGuiInset = true
+    gui.ResetOnSpawn = false
+    gui.DisplayOrder = 2e9
+    gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    pcall(function()
+        gui.Parent = (gethui and gethui()) or CoreGui
+    end)
+    Library._NotifyGui = gui
+
+    local holder = Instance.new("Frame")
+    holder.BackgroundTransparency = 1
+    holder.AnchorPoint = Vector2.new(0.5, 1)
+    holder.Position = UDim2.new(0.5, 0, 1, -16)
+    holder.Size = UDim2.fromOffset(0, 0)
+    holder.AutomaticSize = Enum.AutomaticSize.XY
+    holder.Parent = gui
+
+    local layout = Instance.new("UIListLayout")
+    layout.FillDirection = Enum.FillDirection.Vertical
+    layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+    layout.VerticalAlignment = Enum.VerticalAlignment.Bottom
+    layout.Padding = UDim.new(0, 8)
+    layout.SortOrder = Enum.SortOrder.LayoutOrder
+    layout.Parent = holder
+
+    local function notifyAccent()
+        local accent = Library.Theme and Library.Theme.Accent
+        if type(accent) == "table" and typeof(accent[1]) == "Color3" then
+            return accent[1]
+        end
+        if typeof(accent) == "Color3" then
+            return accent
+        end
+        return Color3.fromRGB(152, 188, 255)
+    end
+
+    function Library:Notify(text, duration, color)
+        if type(self) == "string" then
+            color = duration
+            duration = text
+            text = self
+        end
+        text = tostring(text or "")
+        duration = tonumber(duration) or 3
+        if typeof(color) ~= "Color3" then
+            color = notifyAccent()
+        end
+
+        local card = Instance.new("Frame")
+        card.AutomaticSize = Enum.AutomaticSize.XY
+        card.BackgroundColor3 = Color3.fromRGB(13, 13, 13)
+        card.BorderSizePixel = 0
+        card.BackgroundTransparency = 1
+        card.Parent = holder
+
+        local stroke = Instance.new("UIStroke")
+        stroke.Color = Color3.fromRGB(10, 10, 10)
+        stroke.Thickness = 2
+        stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+        stroke.LineJoinMode = Enum.LineJoinMode.Miter
+        stroke.Transparency = 1
+        stroke.Parent = card
+
+        local pad = Instance.new("UIPadding")
+        pad.PaddingTop = UDim.new(0, 6)
+        pad.PaddingBottom = UDim.new(0, 5)
+        pad.PaddingLeft = UDim.new(0, 8)
+        pad.PaddingRight = UDim.new(0, 8)
+        pad.Parent = card
+
+        local liner = Instance.new("Frame")
+        liner.BorderSizePixel = 0
+        liner.Size = UDim2.new(1, 16, 0, 2)
+        liner.Position = UDim2.fromOffset(-8, -6)
+        liner.BackgroundColor3 = color
+        liner.BackgroundTransparency = 1
+        liner.Parent = card
+
+        local label = Instance.new("TextLabel")
+        label.BackgroundTransparency = 1
+        label.Font = Enum.Font.Code
+        label.TextSize = 12
+        label.TextColor3 = Color3.fromRGB(215, 215, 215)
+        label.Text = text
+        label.AutomaticSize = Enum.AutomaticSize.XY
+        label.TextTransparency = 1
+        label.Parent = card
+
+        card.Size = UDim2.fromOffset(0, 0)
+        task.spawn(function()
+            pcall(function()
+                TweenService:Create(card, TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+                    BackgroundTransparency = 0,
+                    Size = UDim2.fromOffset(0, 24),
+                }):Play()
+                TweenService:Create(stroke, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Transparency = 0 }):Play()
+                TweenService:Create(liner, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { BackgroundTransparency = 0 }):Play()
+                TweenService:Create(label, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { TextTransparency = 0 }):Play()
+            end)
+            task.wait(duration + 0.15)
+            pcall(function()
+                TweenService:Create(card, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { BackgroundTransparency = 1 }):Play()
+                TweenService:Create(stroke, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Transparency = 1 }):Play()
+                TweenService:Create(liner, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { BackgroundTransparency = 1 }):Play()
+                TweenService:Create(label, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { TextTransparency = 1 }):Play()
+            end)
+            task.wait(0.3)
+            pcall(function()
+                card:Destroy()
+            end)
+        end)
+        return card
+    end
+end
 getgenv().Utility = Utility
------------------------------------------------------------------
 do
     Utility.AddInstance = function(NewInstance, Properties)
         local NewInstance = Instance.new(NewInstance)
-        --
         for Index, Value in pairs(Properties) do
             NewInstance[Index] = Value
         end
-        --
         return NewInstance
     end
-    --
     function Utility.CloneTbl(T)
         local Tbl = {}
         for Index, Value in pairs(T) do
@@ -98,7 +206,6 @@ do
         end
         return Tbl
     end
-    --
     Utility.CLCheck = function()
         repeat task.wait() until iswindowactive()
         do
@@ -111,28 +218,22 @@ do
             InputHandle:Destroy()
         end
     end
-    --
     Utility.Loop = function(Delay, Call)
         local Callback = typeof(Call) == "function" and Call or function() end
-        --
         task.spawn(function()
             while task.wait(Delay) do
                 local Success, Error = pcall(function()
                     Callback()
                 end)
-                --
                 if Error then 
                     return 
                 end
             end
         end)
     end
-    --
     Utility.RemoveDrawing = function(Instance, Location)
         local SpecificDrawing = 0
-        --
         Location = Location or Library.Drawings
-        --
         for Index, Value in pairs(Location) do 
             if Value[1] == Instance then
                 if Value[1] then
@@ -144,27 +245,20 @@ do
                 SpecificDrawing = Index
             end
         end
-        --
         table.remove(Location, table.find(Location, Location[SpecificDrawing]))
     end
-    --
     Utility.AddConnection = function(Type, Callback)
         local Connection = Type:Connect(Callback)
-        --
         Library.Connections[#Library.Connections + 1] = Connection
-        --
         return Connection
     end
-    --
     Utility.Round = function(Num, Float)
         local Bracket = 1 / Float;
         return math.floor(Num * Bracket) / Bracket;
     end
-    --
     Utility.AddDrawing = function(Instance, Properties, Location)
         local InstanceType = Instance
         local Instance = Drawing.new(Instance)
-        --
         for Index, Value in pairs(Properties) do
             Instance[Index] = Value
             if InstanceType == "Text" then
@@ -632,6 +726,12 @@ do
                 Library._KeybindHudGui:Destroy()
             end)
             Library._KeybindHudGui = nil
+        end
+        if Library._NotifyGui then
+            pcall(function()
+                Library._NotifyGui:Destroy()
+            end)
+            Library._NotifyGui = nil
         end
         --
     end
@@ -1114,135 +1214,17 @@ do
         end
         --
         function Window.SendNotification(Type, Title, Duration)
-            local Notification, Removed = Window.Notification, false
-            --
-            local NotificationInline = Utility.AddDrawing("Square", {
-                Size = Vector2.new(0, 21),
-                Position = Vector2.new(0, (Window.Notification * 25) + 100),
-                Thickness = 0,
-                Color = Library.Theme.Inline,
-                Visible = true,
-                Filled = true
-            }, Library.Ignores)
-            --
-            local NotificationOutline = Utility.AddDrawing("Square", {
-                Size = Vector2.new(0, NotificationInline.Size.Y - 1),
-                Position = Vector2.new(NotificationInline.Position.X + 2, NotificationInline.Position.Y + 2),
-                Thickness = 0,
-                Color = Library.Theme.DarkContrast,
-                Visible = true,
-                Filled = true
-            }, Library.Ignores)
-            --
-            local NotificationOutlineBorder = Utility.AddDrawing("Square", {
-                Size = Vector2.new(NotificationOutline.Size.X - 2, NotificationOutline.Size.Y + 5),
-                Position = Vector2.new(NotificationOutline.Position.X + 1, NotificationOutline.Position.Y + 1),
-                Thickness = 0,
-                Color = Library.Theme.Accent[1],
-                Visible = false,
-                Filled = true
-            }, Library.Ignores)
-            --
-            local NotificationTopline = Utility.AddDrawing("Square", {
-                Size = Vector2.new(NotificationOutline.Size.X, 1),
-                Position = Vector2.new(NotificationOutline.Position.X, NotificationOutline.Position.Y),
-                Thickness = 0,
-                Color = Type == "Warning" and Library.Theme.Notification.Warning or Type == "Error" and Library.Theme.Notification.Error or Library.Theme.DarkContrast,
-                Visible = Type == "Warning" or Type == "Error",
-                Filled = true
-            }, Library.Ignores)
-            --
-            local NotificationLeftline = Utility.AddDrawing("Square", {
-                Size = Vector2.new(1, NotificationOutline.Size.Y),
-                Position = Vector2.new(NotificationOutline.Position.X, NotificationOutline.Position.Y),
-                Thickness = 0,
-                Color = Type == "Normal" and Library.Theme.Accent[1] or Library.Theme.DarkContrast,
-                Visible = Type == "Normal",
-                Filled = true
-            }, Library.Ignores)
-            --
-            local NotificationImage = Utility.AddDrawing("Image", {
-                Size = NotificationOutlineBorder.Size,
-                Position = NotificationOutlineBorder.Position,
-                Transparency = 1, 
-                Visible = true,
-                Data = Library.Theme.Gradient
-            }, Library.Ignores)
-            --
-            local NotificationText = Utility.AddDrawing("Text", {
-                Font = Library.Theme.Font,
-                Size = Library.Theme.TextSize,
-                Color = Library.Theme.Text,
-                Text = Title,
-                Position = Vector2.new(NotificationOutlineBorder.Position.X + 6, NotificationOutlineBorder.Position.Y + 3),
-                Visible = true,
-                Center = false,
-                Outline = false
-            }, Library.Ignores)
-            --
-            NotificationInline.Size = Vector2.new(NotificationText.TextBounds.X + 15, 21)
-            --
-            NotificationOutline.Size = Vector2.new(NotificationInline.Size.X - 1, NotificationInline.Size.Y - 1)
-            NotificationOutline.Position = Vector2.new(NotificationInline.Position.X + 2, NotificationInline.Position.Y + 2)
-            --
-            NotificationOutlineBorder.Size = Vector2.new(NotificationOutline.Size.X - 2, NotificationOutline.Size.Y - 2)
-            NotificationOutlineBorder.Position = Vector2.new(NotificationOutline.Position.X + 1, NotificationOutline.Position.Y + 1)
-            --
-            NotificationLeftline.Size = Vector2.new(2, NotificationOutline.Size.Y)
-            --
-            NotificationTopline.Size = Vector2.new(NotificationOutline.Size.X, 1)
-            --
-            NotificationImage.Size = NotificationOutline.Size
-            NotificationImage.Position = NotificationOutline.Position
-            --
-            task.spawn(function()
-                for Index = -100, 0, 2 do
-                    pcall(function()
-                        NotificationInline.Position = Vector2.new(Index, (Notification * 25) + 100)
-                        NotificationOutline.Position = Vector2.new(NotificationInline.Position.X + 2, NotificationInline.Position.Y + 2)
-                        NotificationOutlineBorder.Position = Vector2.new(NotificationOutline.Position.X + 2, NotificationOutline.Position.Y + 2)
-                        NotificationText.Position = Vector2.new(NotificationOutline.Position.X + 6, NotificationOutline.Position.Y + 3)
-                        NotificationTopline.Position = Vector2.new(NotificationOutline.Position.X, NotificationOutline.Position.Y)
-                        NotificationImage.Position = NotificationOutline.Position
-                        NotificationLeftline.Position = Vector2.new(NotificationOutline.Position.X, NotificationOutline.Position.Y)
-                    end)
-                    task.wait()
-                end
-            end)
-            --
-            Utility.AddConnection(Library.Communication.Event, function(Type)
-                if Type == "UpdateNotification" then
-                    Notification -= 1
-                    pcall(function()
-                        NotificationInline.Size = Vector2.new(Index, (Notification * 25) + 100)
-                        NotificationOutline.Position = Vector2.new(NotificationInline.Position.X + 2, NotificationInline.Position.Y + 2)
-                        NotificationText.Position = Vector2.new(NotificationOutline.Position.X + 6, NotificationOutline.Position.Y + 3)
-                        NotificationTopline.Position = Vector2.new(NotificationOutline.Position.X, NotificationOutline.Position.Y)
-                        NotificationImage.Position = NotificationOutline.Position
-                        NotificationLeftline.Position = Vector2.new(NotificationOutline.Position.X, NotificationOutline.Position.Y)
-                    end)
-                end
-            end)
-            --
-            Window.Notification += 1
-            --
-            task.spawn(function()
-                task.wait(Duration)
-                --
-                pcall(function()
-                    Utility.RemoveDrawing(NotificationInline, Library.Ignores)
-                    Utility.RemoveDrawing(NotificationLeftline, Library.Ignores)
-                    Utility.RemoveDrawing(NotificationOutline, Library.Ignores)
-                    Utility.RemoveDrawing(NotificationOutlineBorder, Library.Ignores)
-                    Utility.RemoveDrawing(NotificationText, Library.Ignores)
-                    Utility.RemoveDrawing(NotificationTopline, Library.Ignores)
-                    Utility.RemoveDrawing(NotificationImage, Library.Ignores)
-                end)
-                --
-                Library.Communication:Fire("UpdateNotification")
-                --
-                Window.Notification -= 1
-            end)
+            local text = Title
+            if type(text) ~= "string" or text == "" then
+                text = Type
+            end
+            local color
+            if Type == "Warning" then
+                color = Library.Theme.Notification.Warning
+            elseif Type == "Error" then
+                color = Library.Theme.Notification.Error
+            end
+            Library:Notify(text, Duration or 3, color)
         end
         --
         function Window:RefreshPages()
