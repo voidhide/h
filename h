@@ -627,6 +627,12 @@ do
             end)
             Library._UIGlowGui = nil
         end
+        if Library._KeybindHudGui then
+            pcall(function()
+                Library._KeybindHudGui:Destroy()
+            end)
+            Library._KeybindHudGui = nil
+        end
         --
     end
     --
@@ -710,15 +716,86 @@ do
                 Color = Library.Theme.Text,
                 Text = "",
                 Position = Vector2.new(WindowOutlineBorder.Position.X + 3, WindowOutlineBorder.Position.Y + 8),
-                Visible = true,
+                Visible = false,
                 Center = false,
                 Outline = false
             }, Library.Keybind)
             --
-            Utility.AddConnection(RunService.RenderStepped, function(Type, Color)
+            local keybindHud = Instance.new("ScreenGui")
+            keybindHud.Name = "ArtefactKeybindHud"
+            keybindHud.IgnoreGuiInset = true
+            keybindHud.ResetOnSpawn = false
+            keybindHud.DisplayOrder = 1000
+            keybindHud.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+            pcall(function()
+                if gethui then
+                    keybindHud.Parent = gethui()
+                end
+            end)
+            if not keybindHud.Parent then
+                pcall(function()
+                    keybindHud.Parent = game:GetService("CoreGui")
+                end)
+            end
+            Library._KeybindHudGui = keybindHud
+            local keybindHudLabels = {}
+            local keybindGradPhase = 0
+            local keybindGradSpeed = 0.45
+            local function keybindGradColor(phase)
+                local accent = (Library.Theme.Accent and Library.Theme.Accent[1]) or Color3.fromRGB(152, 188, 255)
+                local white = Color3.new(1, 1, 1)
+                local function at(t)
+                    t = (t + phase) % 1
+                    if t < 0.5 then
+                        return white:Lerp(accent, t * 2)
+                    end
+                    return accent:Lerp(white, (t - 0.5) * 2)
+                end
+                return ColorSequence.new({
+                    ColorSequenceKeypoint.new(0, at(0)),
+                    ColorSequenceKeypoint.new(0.5, at(0.5)),
+                    ColorSequenceKeypoint.new(1, at(1)),
+                })
+            end
+            local function ensureKeybindHudGradient(label, phase)
+                local grad = label:FindFirstChild("_FridayKeybindGrad")
+                if not grad then
+                    grad = Instance.new("UIGradient")
+                    grad.Name = "_FridayKeybindGrad"
+                    grad.Rotation = 0
+                    grad.Offset = Vector2.new(0, 0)
+                    grad.Parent = label
+                end
+                grad.Color = keybindGradColor(phase)
+                return grad
+            end
+            local function clearKeybindHudGradient(label)
+                local grad = label:FindFirstChild("_FridayKeybindGrad")
+                if grad then
+                    grad:Destroy()
+                end
+            end
+            local function syncKeybindHudStyle(label, active, phase)
+                if not label then
+                    return
+                end
+                if active then
+                    label.TextColor3 = Color3.new(1, 1, 1)
+                    ensureKeybindHudGradient(label, phase)
+                else
+                    clearKeybindHudGradient(label)
+                    label.TextColor3 = Library.Theme.Text
+                end
+            end
+            --
+            Utility.AddConnection(RunService.RenderStepped, function(dt)
                 CurrentBinds.Text = Window.BindList
+                keybindGradPhase = (keybindGradPhase + (dt or 0) * keybindGradSpeed) % 1
 
-                local CalcuationSize = CurrentBinds.Text ~= "" and Vector2.new(CurrentBinds.TextBounds.X >= 120 and CurrentBinds.TextBounds.X + 6 or 120, 20 + CurrentBinds.TextBounds.Y - 6) or Vector2.new(120, 20)
+                local bounds = CurrentBinds.TextBounds
+                local textW = (typeof(bounds) == "Vector2" and bounds.X) or 0
+                local textH = (typeof(bounds) == "Vector2" and bounds.Y) or 0
+                local CalcuationSize = Window.BindList ~= "" and Vector2.new(math.max(148, textW + 18), 20 + math.max(textH, 0)) or Vector2.new(148, 20)
                 WindowOutline.Size = CalcuationSize
                 
                 WindowOutlineBorder.Size = Vector2.new(WindowOutline.Size.X - 2, WindowOutline.Size.Y - 2)
@@ -727,10 +804,48 @@ do
                 WindowTopline.Size = Vector2.new(WindowOutlineBorder.Size.X, 1)
                 WindowTopline.Position = Vector2.new(WindowOutlineBorder.Position.X, WindowOutlineBorder.Position.Y)
 
+                WindowFrame.Size = Vector2.new(WindowOutlineBorder.Size.X - 2, WindowOutlineBorder.Size.Y - 2)
+                WindowFrame.Position = Vector2.new(WindowOutlineBorder.Position.X + 1, WindowOutlineBorder.Position.Y + 1)
+
                 WindowImage.Size = WindowFrame.Size
                 WindowImage.Position = WindowFrame.Position
 
                 WindowText.Position = Vector2.new(WindowOutlineBorder.Position.X + (WindowOutlineBorder.Size.X / 2), WindowOutlineBorder.Position.Y + 2)
+                CurrentBinds.Position = Vector2.new(WindowOutlineBorder.Position.X + 6, WindowOutlineBorder.Position.Y + 16)
+
+                local lines = {}
+                for line in string.gmatch(Window.BindList or "", "[^\n]+") do
+                    table.insert(lines, line)
+                end
+                local lineH = math.max(Library.Theme.TextSize or 13, 13)
+                local origin = CurrentBinds.Position
+                for i, line in ipairs(lines) do
+                    local label = keybindHudLabels[i]
+                    if not label then
+                        label = Instance.new("TextLabel")
+                        label.BackgroundTransparency = 1
+                        label.BorderSizePixel = 0
+                        label.Font = Enum.Font.Code
+                        label.TextSize = lineH
+                        label.TextXAlignment = Enum.TextXAlignment.Left
+                        label.TextYAlignment = Enum.TextYAlignment.Top
+                        label.ZIndex = 2
+                        label.Parent = keybindHud
+                        keybindHudLabels[i] = label
+                    end
+                    label.Visible = true
+                    label.Text = line
+                    label.Size = UDim2.fromOffset(math.max(textW + 8, 40), lineH + 1)
+                    label.Position = UDim2.fromOffset(origin.X, origin.Y + (i - 1) * lineH)
+                    syncKeybindHudStyle(label, true, keybindGradPhase)
+                end
+                for i = #lines + 1, #keybindHudLabels do
+                    local extra = keybindHudLabels[i]
+                    if extra then
+                        extra.Visible = false
+                        clearKeybindHudGradient(extra)
+                    end
+                end
             end)
             --
             Utility.AddDrag(WindowOutline, Library.Keybind)
@@ -856,6 +971,9 @@ do
             end
             if Library.Flags.UIGlowIntensity == nil then
                 Library.Flags.UIGlowIntensity = 70
+            end
+            if Library.Flags.UIWatermarkEnabled == nil then
+                Library.Flags.UIWatermarkEnabled = true
             end
             local function syncGlow()
                 if not glow.Parent then
@@ -4501,6 +4619,16 @@ do
                     end
                 end
             })
+            Theme:Toggle({
+                Title = "Show Watermark",
+                Flag = "UIWatermarkEnabled",
+                State = true,
+                Callback = function(on)
+                    if Library._Watermark then
+                        Library._Watermark.Visible = on ~= false
+                    end
+                end
+            })
             Theme:Slider({
                 Title = "Glow Intensity",
                 Flag = "UIGlowIntensity",
@@ -4736,7 +4864,7 @@ do
             --
             Utility.AddConnection(RunService.RenderStepped, function()
                 Watermark.FPS += 1
-                if Watermark.Visible then
+                if Watermark.Visible and Library.Flags.UIWatermarkEnabled ~= false then
                     local Hours, Minutes, Secs = os.date("*t")["hour"], os.date("*t")["min"], os.date("*t")["sec"]
                     local Format = Hours > 12 and Hours - 12 or Hours
                     local AMORPM = Hours > 12 and "PM" or "AM"
@@ -4766,6 +4894,7 @@ do
                 end
             end)
             --
+            Library._Watermark = Watermark
             return Watermark
         end
 
